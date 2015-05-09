@@ -1,2 +1,4 @@
 # HOTSAX
 An implementation of HOTSAX enhanced by memoization technique
+
+This work is a branch of another repository https://code.google.com/p/jmotif/ by https://code.google.com/u/seninp/. The previous implementation of HOTSAX in SAXFactory.class have issue of correctness, which means the previous implementation cannot find solutions that exactly conform to the definition of time series discord. I borrow part of the codes from the previous implementation and write my version that has guarantee on correctness. I also improve the performance of HOTSAX with memoization technique so that the number of calls to the distance function is reduced.
