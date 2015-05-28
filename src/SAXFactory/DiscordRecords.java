@@ -20,37 +20,13 @@ public class DiscordRecords implements Iterable<DiscordRecord> {
      * Storage container.
      */
     private final LinkedList<DiscordRecord> discords;
-    private final int k;
-    private final int windowSize;
 
     /**
      * Constructor.
      */
-    public DiscordRecords(int reportnum) {
-        discords = new LinkedList<DiscordRecord>();
-        k = reportnum;
-        windowSize = 0;
-    }
-
-    public DiscordRecords(int reportnum, int window) {
-        discords = new LinkedList<DiscordRecord>();
-        k = reportnum;
-        windowSize = window;
-    }
 
     public DiscordRecords() {
         discords = new LinkedList<DiscordRecord>();
-        k = Integer.MAX_VALUE;
-        windowSize = 0;
-    }
-
-    private boolean isOverlapped(DiscordRecord d1, DiscordRecord d2) {
-        assert windowSize > 0;
-        if (Math.abs(d1.getPosition() - d2.getPosition()) < windowSize) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     // i starts from 0
@@ -67,44 +43,10 @@ public class DiscordRecords implements Iterable<DiscordRecord> {
      * @param discord The discord instance to add.
      * @return if the discord got added.
      */
-    public boolean add(DiscordRecord discord) {
+    public void add(DiscordRecord discord) {
 
-        // System.out.println(" + discord record " + discord);
-        // more complicated - need to check if it will fit in there
-        // DiscordRecord last = discords.get(discords.size() - 1);
-        if (!discords.contains(discord)) {
-            boolean overlap = false;
-            DiscordRecord toberemove = null;
-            for (DiscordRecord d : discords) {
-                if (isOverlapped(d, discord)) {
-                    overlap = true;
-                    if (d.getDistance() < discord.getDistance()) {
-                        discords.add(discord);
-                        toberemove = d;
-                        break;
-                    }
-                }
-            }
-            if (toberemove != null) {
-                discords.remove(toberemove);
-            }
-            if (!overlap) {
-                discords.add(discord);
-            }
+            discords.add(discord);
             Collections.sort(discords);
-            if (discords.size() > k) {
-                discords.remove(0);
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void add(DiscordRecords inputDiscords) {
-        for (DiscordRecord dr : inputDiscords) {
-            add(dr);
-        }
     }
 
     /**
@@ -162,61 +104,6 @@ public class DiscordRecords implements Iterable<DiscordRecord> {
         }
         Collections.sort(discords);
         return discords.get(0).getDistance();
-    }
-
-    // return the Kth biggest distnace
-    public double getKthDistance() {
-
-        if (k < Integer.MAX_VALUE) {
-            if (getSize() < k) {
-                return Double.MIN_VALUE;
-            } else {
-                Collections.sort(discords, Collections.reverseOrder());
-                return discords.get(k - 1).getDistance();
-            }
-        } else {
-            return Double.MIN_VALUE;
-        }
-    }
-
-    // return the Kth biggest distance
-    public double getKthDistance(int i) {
-        if (getSize() < i) {
-            return Double.MIN_VALUE;
-        } else {
-            Collections.sort(discords, Collections.reverseOrder());
-            return discords.get(i).getDistance();
-        }
-    }
-
-    // return the Kth biggest distance
-    public int getKthPosition(int i) {
-        if (getSize() < i) {
-            return -1;
-        } else {
-            Collections.sort(discords, Collections.reverseOrder());
-            return discords.get(i).getPosition();
-        }
-    }
-
-    public String getKthPayload(int i) {
-        if (getSize() < i) {
-            return "";
-        } else {
-            Collections.sort(discords, Collections.reverseOrder());
-            return discords.get(i).getPayload();
-        }
-    }
-
-    // set the distance of the top ith discord
-    // i starts from 0
-    public int setDistance(int i, double dist) {
-        if (i < 0 || i >= getSize()) {
-            return -1;
-        }
-        Collections.sort(discords, Collections.reverseOrder());
-        discords.get(i).setDistance(dist);
-        return 0;
     }
 
     public String toCoordinates() {
