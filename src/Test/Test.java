@@ -44,14 +44,14 @@ public class Test {
     public static void main(String[] args) throws ParseException, Exception {
         // TODO code application logic here
         Date totalstart = new Date();
-        
-        int SLIDING_WINDOW_SIZE = 360;
+
+        int SLIDING_WINDOW_SIZE = 100;
         int ALPHABET_SIZE = 5;
         String DATA_VALUE_ATTRIBUTE = "value0";
-        String FILE = "../datasets/ecg/ecg102.arff";
+        String FILE = "../datasets/exnoise/exnoise.arff";
         int DIMENSION = 5;
-        int LENGTH = 8000;
-        int REPORT_NUM = 5;
+        int LENGTH = -1;
+        int REPORT_NUM = 3;
         int J = 3;
         Level level = Level.FINE;
         int OFFSET = 0;
@@ -142,7 +142,6 @@ public class Test {
         ED ed = new ED();
         HOTSAX hotsax = new HOTSAX(SLIDING_WINDOW_SIZE, ALPHABET_SIZE, ALPHABET_SIZE, dh, ed);
 
-
         DiscordRecords discords = hotsax.findDiscords(REPORT_NUM);
 
         System.out.println("Find discords:\n" + discords.toString() + "\n");
@@ -158,14 +157,14 @@ class DataInMemory extends DataHandler {
 
     private double[] series;
     private int windowSize;
-    private double mean;
-    private double std;
+//    private double mean;
+//    private double std;
 
     public DataInMemory(double[] _series, int _windowSize) {
         series = _series;
         windowSize = _windowSize;
-        mean = TSUtils.mean(series);
-        std = TSUtils.stDev(series);
+//        mean = TSUtils.mean(series);
+//        std = TSUtils.stDev(series);
     }
 
     @Override
@@ -176,6 +175,8 @@ class DataInMemory extends DataHandler {
     @Override
     public double[] get(long i) {
         double[] subSeries = TSUtils.getSubSeries(series, (int) i, (int) i + windowSize);
+        double mean = TSUtils.mean(subSeries);
+        double std = TSUtils.stDev(subSeries);
         return TSUtils.zNormalize(subSeries, mean, std);
     }
 

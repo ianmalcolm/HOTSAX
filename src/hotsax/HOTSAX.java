@@ -7,15 +7,11 @@ package hotsax;
 
 import SAXFactory.DiscordRecords;
 import SAXFactory.SAXFactory;
-import SAXFactory.TSUtils;
-import edu.hawaii.jmotif.sax.LargeWindowAlgorithm;
-import edu.hawaii.jmotif.sax.SlidingWindowMarkerAlgorithm;
 import edu.hawaii.jmotif.sax.alphabet.NormalAlphabet;
 import edu.hawaii.jmotif.sax.datastructures.DiscordRecord;
 import edu.hawaii.jmotif.sax.trie.SAXTrie;
 import edu.hawaii.jmotif.sax.trie.SAXTrieHitEntry;
 import edu.hawaii.jmotif.sax.trie.TrieException;
-import edu.hawaii.jmotif.sax.trie.VisitRegistry;
 import edu.hawaii.jmotif.timeseries.TSException;
 import java.util.ArrayList;
 import java.util.BitSet;
