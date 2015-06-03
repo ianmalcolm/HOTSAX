@@ -35,7 +35,6 @@ public class HOTSAX {
     private int dimension;
     private DataHandler dh;
     private Distance df;
-    private double[] NNDists;
     private ArrayList<SAXTrieHitEntry> frequencies;
     private ArrayList<Integer> allSubsequences;
 
@@ -57,11 +56,6 @@ public class HOTSAX {
             // add result to the structure
             trie.put(String.valueOf(saxVals), i);
             // increment the position            
-        }
-
-        NNDists = new double[(int) dh.size()];
-        for (int i = 0; i < NNDists.length; i++) {
-            NNDists[i] = Double.MAX_VALUE;
         }
 
         frequencies = trie.getFrequencies();
@@ -132,6 +126,7 @@ public class HOTSAX {
         //outer loop
         for (SAXTrieHitEntry outerOccurences : frequencies) {
             int p = outerOccurences.getPosition();
+            double nnDist = Double.MAX_VALUE;
             if (visitedp.get(p)) {
                 continue;
             }
@@ -149,14 +144,11 @@ public class HOTSAX {
                 visitedq.set(q);
 
                 double dist = df.distance(dh.get(p), dh.get(q));
-                if (dist < NNDists[p]) {
-                    NNDists[p] = dist;
-                }
-                if (dist < NNDists[q]) {
-                    NNDists[q] = dist;
+                if (dist < nnDist) {
+                    nnDist = dist;
                 }
 
-                if (NNDists[p] < bestSoFarDistance) {
+                if (nnDist < bestSoFarDistance) {
                     completeSearch = false;
                     break;
                 }
@@ -172,20 +164,17 @@ public class HOTSAX {
                         continue;
                     }
                     double dist = df.distance(dh.get(p), dh.get(q));
-                    if (dist < NNDists[p]) {
-                        NNDists[p] = dist;
+                    if (dist < nnDist) {
+                        nnDist = dist;
                     }
-                    if (dist < NNDists[q]) {
-                        NNDists[q] = dist;
-                    }
-                    if (NNDists[p] < bestSoFarDistance) {
+                    if (nnDist < bestSoFarDistance) {
                         break;
                     }
                 }
             }
 
-            if (NNDists[p] > bestSoFarDistance) {
-                bestSoFarDistance = NNDists[p];
+            if (nnDist > bestSoFarDistance) {
+                bestSoFarDistance = nnDist;
                 bestSoFarPosition = p;
                 bestSoFarString = new String(outerWord);
                 logger.fine("update best so far position: " + bestSoFarPosition + "\tdistance: " + bestSoFarDistance);
