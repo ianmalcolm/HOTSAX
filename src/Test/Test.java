@@ -25,6 +25,9 @@ import org.apache.commons.cli.ParseException;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
+import java.util.regex.Pattern;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 /**
  *
@@ -43,18 +46,19 @@ public class Test {
      */
     public static void main(String[] args) throws ParseException, Exception {
         // TODO code application logic here
-        Date totalstart = new Date();
 
         int SLIDING_WINDOW_SIZE = 100;
         int ALPHABET_SIZE = 5;
+        int DIMENSION = 5;
         String DATA_VALUE_ATTRIBUTE = "value0";
         String FILE = "../datasets/exnoise/exnoise.arff";
-        int DIMENSION = 5;
         int LENGTH = -1;
-        int REPORT_NUM = 3;
-        int J = 3;
+        int REPORT_NUM = 1;
         Level level = Level.FINE;
         int OFFSET = 0;
+        double[] series;
+
+        Date totalstart = new Date();
 
         if (args.length > 0) {
             Options options = new Options();
@@ -64,6 +68,7 @@ public class Test {
             options.addOption("fil", true, "The file name of the dataset");
             options.addOption("att", true, "The abbribute of instances, see the introduction of arff in WEKA for details");
             options.addOption("alp", true, "The size of alphabets, typical value 5");
+            options.addOption("dim", true, "The size of dimension, typical value 5");
             options.addOption("win", true, "The size of sliding window");
             options.addOption("log", true, "The log level");
             options.addOption("h", false, "Print help message");
@@ -79,6 +84,9 @@ public class Test {
 
             if (cmd.hasOption("alp")) {
                 ALPHABET_SIZE = Integer.parseInt(cmd.getOptionValue("alp"));
+            }
+            if (cmd.hasOption("dim")) {
+                DIMENSION = Integer.parseInt(cmd.getOptionValue("dim"));
             }
             if (cmd.hasOption("ofs")) {
                 OFFSET = Integer.parseInt(cmd.getOptionValue("ofs"));
@@ -123,6 +131,7 @@ public class Test {
         System.out.println("-fil " + FILE
                 + " -att " + DATA_VALUE_ATTRIBUTE
                 + " -win " + SLIDING_WINDOW_SIZE
+                + " -dim " + DIMENSION
                 + " -ofs " + OFFSET
                 + " -len " + LENGTH
                 + " -rep " + REPORT_NUM
@@ -130,24 +139,53 @@ public class Test {
 
         HOTSAX.setLoggerLevel(level);
         // get the data first
-        Instances tsData = ConverterUtils.DataSource.read(FILE);
-        Attribute dataAttribute = tsData.attribute(DATA_VALUE_ATTRIBUTE);
-        double[] series = SAXFactory.toRealSeries(tsData, dataAttribute);
 
-        if (LENGTH > 0) {
-            series = SAXFactory.getSubSeries(series, OFFSET, OFFSET + LENGTH);
+        {
+            String patternArff = "([^\\s]+(\\.(?i)(arff))$)";
+            Pattern pattern = Pattern.compile(patternArff);
+            if (pattern.matcher(FILE).matches()) {
+                Instances tsData = ConverterUtils.DataSource.read(FILE);
+                Attribute dataAttribute = tsData.attribute(DATA_VALUE_ATTRIBUTE);
+                series = SAXFactory.toRealSeries(tsData, dataAttribute);
+                if (LENGTH > 0) {
+                    series = SAXFactory.getSubSeries(series, OFFSET, OFFSET + LENGTH);
+                }
+            } else {
+                series = new double[LENGTH];
+                int i = 0;
+                int ofsCnt = 1;
+                try (BufferedReader br = new BufferedReader(new FileReader(FILE))) {
+                    String line;
+                    while (ofsCnt++ < OFFSET) {
+                        line = br.readLine();
+                        if (line == null) {
+                            System.out.println("Not enough lines in " + FILE);
+                            return;
+                        }
+                    }
+                    while (i < LENGTH) {
+                        line = br.readLine();
+                        if (line == null) {
+                            System.out.println("Not enough lines in " + FILE);
+                            return;
+                        }
+                        series[i++] = Double.parseDouble(line);
+                    }
+                    br.close();
+                }
+            }
         }
 
         DataInMemory dh = new DataInMemory(series, SLIDING_WINDOW_SIZE);
         ED ed = new ED();
-        HOTSAX hotsax = new HOTSAX(SLIDING_WINDOW_SIZE, ALPHABET_SIZE, ALPHABET_SIZE, dh, ed);
+        HOTSAX hotsax = new HOTSAX(SLIDING_WINDOW_SIZE, ALPHABET_SIZE, DIMENSION, dh, ed);
 
         DiscordRecords discords = hotsax.findDiscords(REPORT_NUM);
 
         System.out.println("Find discords:\n" + discords.toString() + "\n");
-
         Date totalend = new Date();
-        System.out.println("Total time elapsed: " + (totalend.getTime() - totalstart.getTime()) / 1000);
+
+        System.out.println("Discovery time elapsed: " + (totalend.getTime() - totalstart.getTime()) / 1000);
         System.out.println("Total count of the calls to the distance function: " + hotsax.totalcnt);
     }
 
