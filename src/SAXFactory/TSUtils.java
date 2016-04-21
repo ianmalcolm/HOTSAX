@@ -7,7 +7,7 @@ package SAXFactory;
 
 /**
  *
- * @author ian
+ * @author Pavel Senin
  */
 public class TSUtils {
 

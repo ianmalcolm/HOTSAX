@@ -235,6 +235,9 @@ class DataInMemory extends DataHandler {
 
 }
 
+/**
+ * @author Pavel Senin
+ */
 class ED extends Distance {
 
     private long cnt = 0;

@@ -122,10 +122,12 @@ public class HOTSAX {
         double bestSoFarDistance = Double.NEGATIVE_INFINITY;
         int bestSoFarPosition = Integer.MIN_VALUE;
         String bestSoFarString = "";
+        int ssCnt = 0;
 
         //outer loop
         for (SAXTrieHitEntry outerOccurences : frequencies) {
             int p = outerOccurences.getPosition();
+            ssCnt++;
             double nnDist = Double.MAX_VALUE;
             if (visitedp.get(p)) {
                 continue;
@@ -177,7 +179,7 @@ public class HOTSAX {
                 bestSoFarDistance = nnDist;
                 bestSoFarPosition = p;
                 bestSoFarString = new String(outerWord);
-                logger.fine("update best so far position: " + bestSoFarPosition + "\tdistance: " + bestSoFarDistance);
+                logger.fine("visited candicates: " + ssCnt + "\tupdate best so far position: " + bestSoFarPosition + "\tdistance: " + bestSoFarDistance);
 
             }
 
